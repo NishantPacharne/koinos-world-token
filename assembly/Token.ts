@@ -101,11 +101,11 @@ export class Token {
 
   _approve(args: token.approve_arguments): void {
     const key = new Uint8Array(50);
-    key.set(args.owner!, 0);
-    key.set(args.spender!, 25);
+    key.set(args.owner, 0);
+    key.set(args.spender, 25);
     this.allowances.put(key, new token.uint64(args.value));
 
-    const impacted = [args.spender!, args.owner!];
+    const impacted = [args.spender, args.owner];
     System.event(
       "token.approve_event",
       Protobuf.encode<token.approve_arguments>(args, token.approve_arguments.encode),
@@ -113,40 +113,72 @@ export class Token {
     );
   }
 
-  
-
-  transfer(args: token.transfer_arguments): token.empty_message {
+  _transfer(args: token.transfer_arguments): void {
     const from = args.from;
     const to = args.to;
     const value = args.value;
 
-    System.require(!Arrays.equal(from, to), 'Cannot transfer to self');
-
-    System.require(
-      Arrays.equal(System.getCaller().caller, args.from) ||
-      System.checkAuthority(authority.authorization_type.contract_call, args.from, System.getArguments().args),
-      "'from' has not authorized transfer",
-      error.error_code.authorization_failure
-    );
-
     const fromBalance = this._balancesStorage.get(from)!;
+    System.require(
+      fromBalance.value >= args.value,
+      "account 'from' has insufficient balance"
+    );
+    fromBalance.value -= args.value;
 
-    System.require(fromBalance.value >= value, "'from' has insufficient balance");
 
     const toBalance = this._balancesStorage.get(to)!;
-
-    // the balances cannot hold more than the supply, so we don't check for overflow/underflow
-    fromBalance.value -= value;
-    toBalance.value += value;
+    toBalance.value += args.value;
 
     this._balancesStorage.put(from, fromBalance);
     this._balancesStorage.put(to, toBalance);
 
+    const impacted = [args.to, args.from];
     const transferEvent = new token.transfer_event(from, to, value);
-    const impacted = [to, from];
 
     System.event('koinos.contracts.token.transfer_event', Protobuf.encode(transferEvent, token.transfer_event.encode), impacted);
 
+  }
+  
+
+  // transfer(args: token.transfer_arguments): token.empty_message {
+  //   const from = args.from;
+  //   const to = args.to;
+  //   const value = args.value;
+
+  //   System.require(!Arrays.equal(from, to), 'Cannot transfer to self');
+
+  //   System.require(
+  //     Arrays.equal(System.getCaller().caller, args.from) ||
+  //     System.checkAuthority(authority.authorization_type.contract_call, args.from, System.getArguments().args),
+  //     "'from' has not authorized transfer",
+  //     error.error_code.authorization_failure
+  //   );
+
+  //   const fromBalance = this._balancesStorage.get(from)!;
+
+  //   System.require(fromBalance.value >= value, "'from' has insufficient balance");
+
+  //   const toBalance = this._balancesStorage.get(to)!;
+
+  //   // the balances cannot hold more than the supply, so we don't check for overflow/underflow
+  //   fromBalance.value -= value;
+  //   toBalance.value += value;
+
+  //   this._balancesStorage.put(from, fromBalance);
+  //   this._balancesStorage.put(to, toBalance);
+
+  //   const transferEvent = new token.transfer_event(from, to, value);
+  //   const impacted = [to, from];
+
+  //   System.event('koinos.contracts.token.transfer_event', Protobuf.encode(transferEvent, token.transfer_event.encode), impacted);
+
+  //   return new token.empty_message();
+  // }
+
+  transfer(args: token.transfer_arguments): token.empty_message {
+    const isAuthorized = this.check_authority(args.from, args.value);
+    System.require(isAuthorized, "from has not authorized transfer");
+    this._transfer(args);
     return new token.empty_message();
   }
 
@@ -380,7 +412,7 @@ export class Token {
     const spender = args.spender;
     const value = args.value;
 
-    const isAuthorized = System2.check_authority(owner!);
+    const isAuthorized = System2.check_authority(owner);
     System.require(isAuthorized, "approve operation not authorized");
     this._approve(args);
 
@@ -396,8 +428,8 @@ export class Token {
     const res = new token.allowance_result();
 
     const key = new Uint8Array(50);
-    key.set(owner!, 0);
-    key.set(spender!, 25);
+    key.set(owner, 0);
+    key.set(spender, 25);
 
     res.value =  this.allowances.get(key)!.value;
     return res;
@@ -413,8 +445,8 @@ export class Token {
 
 
     let key = new Uint8Array(50);
-    key.set(args.owner!, 0);
-    key.set(args.start ? args.start! : new Uint8Array(0), 25);
+    key.set(args.owner, 0);
+    key.set(args.start ? args.start : new Uint8Array(0), 25);
     const result = new token.get_allowances_result(args.owner, []);
     for (let i = 0; i < args.limit; i += 1) {
       const nextAllowance =
@@ -423,7 +455,7 @@ export class Token {
           : this.allowances.getPrev(key);
       if (
         !nextAllowance ||
-        !Arrays.equal(args.owner!, nextAllowance.key!.slice(0, 25))
+        !Arrays.equal(args.owner, nextAllowance.key!.slice(0, 25))
       )
         break;
       const spender = nextAllowance.key!.slice(25);

@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "license": "MIT",
   "dependencies": {
-    "@koinosbox/contracts": "^1.2.4"
+    "@koinosbox/contracts": "^1.2.4",
+    "@koinosbox/sdk-as": "^1.1.0-alpha.4"
   },
   "devDependencies": {
     "@as-covers/core": "^0.2.1",

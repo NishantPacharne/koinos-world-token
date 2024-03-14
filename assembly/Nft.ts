@@ -21,7 +21,7 @@ export class Nft {
             System.exit(callRes.code, StringBytes.stringToBytes(errorMessage));
         }
         if (!callRes.res.object) return new collections.uint64_object(0);
-        return Protobuf.decode<collections.uint64_object>(callRes.res.object!, collections.uint64_object.decode);
+        return Protobuf.decode<collections.uint64_object>(callRes.res.object, collections.uint64_object.decode);
     }
 
     /**
@@ -48,22 +48,22 @@ export class Nft {
         const argsBuffer = Protobuf.encode(args, collections.owner_of_arguments.encode);
         const callRes = System.call(this._contractId, 3982608455, argsBuffer);
         if (callRes.code != 0) {
-            const errorMessage = `failed to call 'Nft.owner_of': ${callRes.res.error && callRes.res.error!.message ? callRes.res.error!.message! : "unknown error"}`;
+            const errorMessage = `failed to call 'Nft.owner_of': ${callRes.res.error && callRes.res.error!.message ? callRes.res.error!.message : "unknown error"}`;
             System.exit(callRes.code, StringBytes.stringToBytes(errorMessage));
         }
         if (!callRes.res.object) return new collections.address_object();
-        return Protobuf.decode<collections.address_object>(callRes.res.object!, collections.address_object.decode);
+        return Protobuf.decode<collections.address_object>(callRes.res.object, collections.address_object.decode);
     }
 
     get_timestamp(args: collections.get_timestamp_arguments): collections.uint64_object {
         const argsBuffer = Protobuf.encode(args, collections.get_timestamp_arguments.encode);
         const callRes = System.call(this._contractId, 0x05720ff8, argsBuffer);
         if (callRes.code != 0) {
-          const errorMessage = `failed to call 'Nft.get_timestamp': ${callRes.res.error && callRes.res.error!.message ? callRes.res.error!.message! : "unknown error"}`;
+          const errorMessage = `failed to call 'Nft.get_timestamp': ${callRes.res.error && callRes.res.error!.message ? callRes.res.error!.message : "unknown error"}`;
           System.exit(callRes.code, StringBytes.stringToBytes(errorMessage));
         }
         if (!callRes.res.object) return new collections.uint64_object();
-        return Protobuf.decode<collections.uint64_object>(callRes.res.object!, collections.uint64_object.decode);
+        return Protobuf.decode<collections.uint64_object>(callRes.res.object, collections.uint64_object.decode);
       }
     
 
@@ -95,7 +95,7 @@ export class Nft {
             System.exit(callRes.code, StringBytes.stringToBytes(errorMessage));
         }
         if (!callRes.res.object) return new common.uint64(0);
-        return Protobuf.decode<common.uint64>(callRes.res.object!, common.uint64.decode);
+        return Protobuf.decode<common.uint64>(callRes.res.object, common.uint64.decode);
     }
 
 }
