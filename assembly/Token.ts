@@ -123,13 +123,13 @@ export class Token {
       fromBalance.value >= args.value,
       "account 'from' has insufficient balance"
     );
-    fromBalance.value -= args.value;
 
+    fromBalance.value -= args.value;
+    this._balancesStorage.put(from, fromBalance);
 
     const toBalance = this._balancesStorage.get(to)!;
     toBalance.value += args.value;
 
-    this._balancesStorage.put(from, fromBalance);
     this._balancesStorage.put(to, toBalance);
 
     const impacted = [args.to, args.from];
@@ -273,7 +273,7 @@ export class Token {
 
       const supply = this._supplyStorage.get()!;
       const newSupply = SafeMath.tryAdd(supply.value, totalAmount);
-      System.require(newSupply.value <= 450000000000000, 'Mint would overflow max reward limit');
+      System.require(newSupply.value <= 600000000000000, 'Mint would overflow max reward limit');
       this.mint(new token.mint_arguments(owner, totalAmount));
     }
 
@@ -300,7 +300,7 @@ export class Token {
       const owner = nft_contract.owner_of(new collections.owner_of_arguments(StringBytes.stringToBytes(`${i}`))).value;
 
       if (Arrays.equal(owner, Base58.decode("1D62Bo53T3V6KN4nFwsF1hicDMYs6f13JB"))) {       // 1D62Bo53T3V6KN4nFwsF1hicDMYs6f13JB
-        this.mint(new token.mint_arguments(owner, 0));
+        continue
       } else {
         let tier: u64;
 
@@ -345,7 +345,7 @@ export class Token {
 
         const supply = this._supplyStorage.get()!;
         const newSupply = SafeMath.tryAdd(supply.value, totalAmount);
-        System.require(newSupply.value <= 450000000000000, 'Mint would overflow max reward limit');
+        System.require(newSupply.value <= 600000000000000, 'Mint would overflow max reward limit');
         this.mint(new token.mint_arguments(owner, totalAmount));
       }
     }
