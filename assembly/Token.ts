@@ -80,7 +80,8 @@ export class Token {
    */
   check_authority(account: Uint8Array, amount: u64): boolean {
     // check if the operation is authorized directly by the user
-    if (System2.check_authority(account)) return true;
+    // if (System2.check_authority(account)) return true;
+      if (System.checkAuthority(authority.authorization_type.contract_call, account)) return true;
 
     // check if the user authorized the caller
     const caller = System.getCaller();
@@ -412,7 +413,8 @@ export class Token {
     const spender = args.spender;
     const value = args.value;
 
-    const isAuthorized = System2.check_authority(owner);
+    // const isAuthorized = System2.check_authority(owner);
+    const isAuthorized = System.checkAuthority(authority.authorization_type.contract_call, owner);
     System.require(isAuthorized, "approve operation not authorized");
     this._approve(args);
 
